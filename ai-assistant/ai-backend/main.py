@@ -14,7 +14,7 @@ def root():
 # ✅ Enable CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # You can restrict this to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,8 +27,8 @@ class Question(BaseModel):
 # 🧠 AI endpoint
 @app.post("/ask")
 def ask_question(q: Question):
-    # 🔄 Step 1: Fetch employee data from Spring Boot
     try:
+        # 🔄 Step 1: Fetch employee data from Spring Boot
         employee_res = requests.get("http://host.docker.internal:8080/api/employees")
         employees = employee_res.json()
     except Exception as e:
@@ -55,14 +55,14 @@ Give a helpful answer based on the data.
     # 🚀 Step 4: Stream response from Mistral via Ollama
     def generate():
         try:
-            ollama_response = requests.post(
+            response = requests.post(
                 "http://host.docker.internal:11434/api/generate",
                 json={"model": "mistral", "prompt": prompt, "stream": True},
                 stream=True
             )
-            for chunk in ollama_response.iter_lines():
-                if chunk:
-                    data = json.loads(chunk.decode("utf-8"))
+            for line in response.iter_lines():
+                if line:
+                    data = json.loads(line.decode("utf-8"))
                     if "response" in data:
                         yield data["response"]
         except Exception as e:
