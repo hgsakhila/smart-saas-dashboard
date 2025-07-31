@@ -1,71 +1,69 @@
+import os
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import requests
-import json
+import traceback
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-@app.get("/")
-def root():
-    return {"status": "✅ FastAPI AI Assistant is running"}
-
-# ✅ Enable CORS for React frontend
+# Add this CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to your frontend domain
+    allow_origins=["*"],  # Or specify your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 📦 Input schema
-class Question(BaseModel):
+# Get Ollama URL from environment variable
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+SPRINGBOOT_BACKEND_URL = "http://backend:8080/api/employees"
+
+class QuestionRequest(BaseModel):
     question: str
 
-# 🧠 AI endpoint
 @app.post("/ask")
-def ask_question(q: Question):
+def ask_question(request: QuestionRequest):
+    question = request.question
+
     try:
-        # 🔄 Step 1: Fetch employee data from Spring Boot
-        employee_res = requests.get("http://host.docker.internal:8080/api/employees")
-        employees = employee_res.json()
-    except Exception as e:
-        return { "reply": f"⚠️ Error fetching employee data: {str(e)}" }
+        # Step 1: Get employee data
+        emp_response = requests.get(SPRINGBOOT_BACKEND_URL)
+        emp_response.raise_for_status()
+        employees = emp_response.json()
 
-    # 📋 Step 2: Format employee data
-    employee_text = "\n".join([
-        f"- {emp['name']} ({emp['department']}, {emp['role']}, Joined: {emp['createdAt']})"
-        for emp in employees
-    ])
+        if not employees:
+            return {"error": "No employees found from backend."}
 
-    # 🧱 Step 3: Build prompt
-    prompt = f"""
-You are an AI assistant for a company dashboard.
+        # Step 2: Format prompt
+        employee_info = "\n".join(
+            f"{emp['name']} - {emp['department']} - {emp['role']}" for emp in employees
+        )
 
-Here is the employee data:
-{employee_text}
+        prompt = f"""
+You are an assistant for a SaaS dashboard. Here is the employee data:
 
-User question: {q.question}
+{employee_info}
 
-Give a helpful answer based on the data.
+Question: {question}
+
+Answer in one sentence.
 """
 
-    # 🚀 Step 4: Stream response from Mistral via Ollama
-    def generate():
-        try:
-            response = requests.post(
-                "http://host.docker.internal:11434/api/generate",
-                json={"model": "mistral", "prompt": prompt, "stream": True},
-                stream=True
-            )
-            for line in response.iter_lines():
-                if line:
-                    data = json.loads(line.decode("utf-8"))
-                    if "response" in data:
-                        yield data["response"]
-        except Exception as e:
-            yield f"⚠️ Error from AI model: {str(e)}"
+        # Step 3: Call Ollama
+        ollama_response = requests.post(
+            f"{OLLAMA_BASE_URL}/api/generate",
+            json={"model": "llama3", "prompt": prompt, "stream": False},
+        )
+        ollama_response.raise_for_status()
 
-    return StreamingResponse(generate(), media_type="text/plain")
+        result = ollama_response.json()
+        return {"answer": result.get("response", "⚠️ No answer from model.")}
+
+    except Exception as e:
+        return {
+            "error": "⚠️ Error occurred in AI assistant.",
+            "details": str(e),
+            "trace": traceback.format_exc()
+        }
