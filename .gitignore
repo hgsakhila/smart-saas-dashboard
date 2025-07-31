@@ -1,9 +1,36 @@
-/target
-*.iml
-*.log
-*.class
-*.jar
-*.war
-.idea
+# === Java / Spring Boot ===
+demo/target/
+demo/*.class
+demo/*.log
+demo/*.jar
+demo/*.war
+demo/*.iml
+demo/.idea/
+demo/.classpath
+demo/.project
+demo/.settings/
+demo/.mtj.tmp/
+demo/hs_err_pid*
+demo/replay_pid*
+
+# === React Frontend ===
+Frontend-SaaS/node_modules/
+Frontend-SaaS/build/
+Frontend-SaaS/.env
+
+# === FastAPI / Python AI Assistant ===
+ai-assistant/__pycache__/
+ai-assistant/*.pyc
+ai-assistant/.venv/
+ai-assistant/venv/
+ai-assistant/.env
+
+# === Global ignores ===
 .DS_Store
 .env
+*.log
+*.zip
+*.tar.gz
+*.rar
+*.swp
+*.swo
