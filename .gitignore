@@ -1,36 +1,33 @@
-# === Java / Spring Boot ===
-demo/target/
-demo/*.class
-demo/*.log
-demo/*.jar
-demo/*.war
-demo/*.iml
-demo/.idea/
-demo/.classpath
-demo/.project
-demo/.settings/
-demo/.mtj.tmp/
-demo/hs_err_pid*
-demo/replay_pid*
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# === React Frontend ===
-Frontend-SaaS/node_modules/
-Frontend-SaaS/build/
-Frontend-SaaS/.env
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# === FastAPI / Python AI Assistant ===
-ai-assistant/__pycache__/
-ai-assistant/*.pyc
-ai-assistant/.venv/
-ai-assistant/venv/
-ai-assistant/.env
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
 
-# === Global ignores ===
-.DS_Store
-.env
-*.log
-*.zip
-*.tar.gz
-*.rar
-*.swp
-*.swo
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
