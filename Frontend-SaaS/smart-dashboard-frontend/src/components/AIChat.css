@@ -1,0 +1,23 @@
+.ai-chat-container {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ai-message {
+  margin: 0.5rem 0;
+}
+
+.ai-user {
+  font-weight: bold;
+  color: #333;
+}
+
+.ai-assistant {
+  background-color: #e1f5fe;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
